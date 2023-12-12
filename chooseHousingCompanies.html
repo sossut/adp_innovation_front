@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #cities {
+        display: flex;
+        flex-direction: row;
+
+        margin: 2%;
+      }
+      .city {
+        margin: 20px;
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+      }
+      .active {
+        color: #49aaa4;
+      }
+      .postcode {
+        display: flex;
+        flex-direction: column;
+        border: solid 1px #e6e6e6;
+        padding-bottom: 1rem;
+      }
+      .housing-company {
+        display: flex;
+        flex-direction: column;
+        border: solid 1px #e6e6e6;
+        margin-left: 2rem;
+      }
+      .postcode-header-div {
+        display: flex;
+      }
+      .toggle-button {
+        height: min-content;
+        width: min-content;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h2 id="header">Alueet</h2>
+      <div id="cities">
+        <button id="city-all" class="city active">Kaikki</button>
+        <button id="city-hel" class="city">Helsinki</button>
+        <button id="city-esp" class="city">Espoo</button>
+        <button id="city-van" class="city">Vantaa</button>
+        <button id="city-kau" class="city">Kauniainen</button>
+      </div>
+      <div id="postcodes"></div>
+      <button id="submit-button" type="button">Seuraava</button>
+    </main>
+  </body>
+  <script>
+    const getAndRenderHousingCompanies = async () => {
+      const cities = document.getElementById("cities");
+      const cityAll = document.getElementById("city-all");
+      const cityHel = document.getElementById("city-hel");
+      const cityEsp = document.getElementById("city-esp");
+      const cityVan = document.getElementById("city-van");
+      const cityKau = document.getElementById("city-kau");
+      const submitButton = document.getElementById("submit-button");
+      const cityButtons = document.querySelectorAll(".city");
+      const postCodesDiv = document.getElementById("postcodes");
+      const getHousingCompanies = async (city) => {
+        const response = await fetch(
+          `http://localhost:5000/api/v1/housing-company/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const data = await response.json();
+        console.log(data);
+        return data;
+      };
+
+      const housingCompanies = await getHousingCompanies();
+      const espoo = housingCompanies.filter(
+        (housingCompany) => housingCompany.city.name === "Espoo"
+      );
+      const helsinki = housingCompanies.filter(
+        (housingCompany) => housingCompany.city.name === "Helsinki"
+      );
+      const vantaa = housingCompanies.filter(
+        (housingCompany) => housingCompany.city.name === "Vantaa"
+      );
+      const kauniainen = housingCompanies.filter(
+        (housingCompany) => housingCompany.city.name === "Kauniainen"
+      );
+      const filterByPostcode = (array, postcode) => {
+        const filteredHousingCompanies = array.filter(
+          (housingCompany) => housingCompany.postcode.code === postcode
+        );
+        return filteredHousingCompanies;
+      };
+      console.log(filterByPostcode(helsinki, "00130"));
+
+      cityButtons.forEach((button) => {
+        button.addEventListener("click", (elem) => {
+          const siblings = elem.target.parentNode.children;
+          for (let i = 0; i < siblings.length; i++) {
+            siblings[i].classList.remove("active");
+          }
+          elem.target.classList.add("active");
+          // if (elem.target.id == "city-hel") {
+          //   renderHousingCompanies(helsinki);
+          // } else if (elem.target.id == "city-esp") {
+          //   renderHousingCompanies(espoo);
+          // } else if (elem.target.id == "city-van") {
+          //   renderHousingCompanies(vantaa);
+          // } else if (elem.target.id == "city-kau") {
+          //   renderHousingCompanies(kauniainen);
+          // }
+        });
+      });
+
+      // const renderHousingCompanies = (array) => {
+      //   housingCompaniesDiv.innerHTML = "";
+      //   const checkBox = document.createElement("input");
+      //   checkBox.setAttribute("type", "checkbox");
+      //   checkBox.setAttribute("id", "check-box");
+      //   const label = document.createElement("label");
+      //   label.setAttribute("for", "check-box");
+      //   label.innerHTML = "Valitse kaikki";
+
+      //   array.forEach((housingCompany) => {
+      //     const housingCompanyDiv = document.createElement("div");
+      //     housingCompanyDiv.classList.add("housing-company");
+      //     const housingCompanyName = document.createElement("h3");
+      //     housingCompanyName.innerHTML = housingCompany.NAME;
+      //     const housingCompanyAddress = document.createElement("p");
+      //     housingCompanyAddress.innerHTML = `${housingCompany.address.street} ${housingCompany.address.number}, ${housingCompany.postcode.code} ${housingCompany.city.name}`;
+      //     const hcCheckBoxDiv = document.createElement("div");
+      //     hcCheckBoxDiv.classList.add("hc-checkbox-div");
+      //     const hcCheckBox = document.createElement("input");
+      //     hcCheckBox.setAttribute("type", "checkbox");
+      //     hcCheckBox.setAttribute("class", "check-box-hc");
+      //     hcCheckBox.value = housingCompany.id;
+      //     const label1 = document.createElement("label");
+      //     label1.setAttribute("for", "check-box-hc");
+      //     label1.innerHTML = "Valitse";
+      //     housingCompanyDiv.appendChild(housingCompanyName);
+      //     housingCompanyDiv.appendChild(housingCompanyAddress);
+      //     console.log(label1);
+      //     hcCheckBoxDiv.appendChild(label1);
+      //     hcCheckBoxDiv.appendChild(hcCheckBox);
+      //     housingCompanyDiv.appendChild(hcCheckBoxDiv);
+      //   });
+      // };
+      const postcodesByArea = (array) => {
+        const postcodes = array.map((housingCompany) => {
+          const postcode = {
+            name: housingCompany.postcode.name,
+            id: housingCompany.postcode.postcode_id,
+            code: housingCompany.postcode.code,
+            housingCompanies: filterByPostcode(
+              housingCompanies,
+              housingCompany.postcode.code
+            ),
+          };
+
+          return postcode;
+        });
+
+        const unique = postcodes.filter(
+          (thing, index, self) =>
+            index ===
+            self.findIndex(
+              (t) => t.code === thing.code && t.name === thing.name
+            )
+        );
+        //aakkosjärjestys
+        const sortedByPostcode = unique.sort((a, b) =>
+          // a.code > b.code ? 1 : -1
+          a.code.localeCompare(b.code)
+        );
+        return sortedByPostcode;
+      };
+
+      const renderPostcodesByCity = (array) => {
+        postCodesDiv.innerHTML = "";
+        const checkBoxAll = document.createElement("input");
+        checkBoxAll.setAttribute("type", "checkbox");
+        checkBoxAll.setAttribute("id", "check-box");
+        const label = document.createElement("label");
+        label.setAttribute("for", "check-box");
+        label.innerHTML = "Valitse kaikki";
+        postCodesDiv.appendChild(label);
+        postCodesDiv.appendChild(checkBoxAll);
+        array.forEach((postcode) => {
+          const postcodeDiv = document.createElement("div");
+          postcodeDiv.classList.add("postcode");
+          const headerDiv = document.createElement("div");
+          headerDiv.classList.add("postcode-header-div");
+          const postcodeName = document.createElement("h3");
+          postcodeName.innerHTML = postcode.name + " " + postcode.code;
+          const toggleButton = document.createElement("button");
+          toggleButton.innerHTML = "+";
+          toggleButton.classList.add("toggle-button");
+          headerDiv.appendChild(postcodeName);
+          headerDiv.appendChild(toggleButton);
+          postcodeDiv.appendChild(headerDiv);
+          const postcodeCheckBoxDiv = document.createElement("div");
+          postcodeCheckBoxDiv.classList.add("postcode-checkbox-div");
+          const postcodeCheckBox = document.createElement("input");
+          postcodeCheckBox.setAttribute("type", "checkbox");
+          postcodeCheckBox.setAttribute("class", "check-box-postcode");
+          postcodeCheckBox.value = postcode.id;
+          const label = document.createElement("label");
+          label.setAttribute("for", "check-box-postcode");
+          label.innerHTML = "Valitse";
+          postcodeCheckBoxDiv.appendChild(label);
+          postcodeCheckBoxDiv.appendChild(postcodeCheckBox);
+          postcodeDiv.appendChild(postcodeCheckBoxDiv);
+          postCodesDiv.appendChild(postcodeDiv);
+          const housingCompaniesDiv = document.createElement("div");
+          housingCompaniesDiv.classList.add("housing-companies");
+          housingCompaniesDiv.style.display = "none";
+          toggleButton.addEventListener("click", () => {
+            if (housingCompaniesDiv.style.display === "none") {
+              housingCompaniesDiv.style.display = "block";
+              toggleButton.innerHTML = "-";
+            } else {
+              housingCompaniesDiv.style.display = "none";
+              toggleButton.innerHTML = "+";
+            }
+          });
+
+          postcode.housingCompanies.forEach((housingCompany) => {
+            const housingCompanyDiv = document.createElement("div");
+            housingCompanyDiv.classList.add("housing-company");
+            const housingCompanyName = document.createElement("h3");
+            housingCompanyName.innerHTML = housingCompany.NAME;
+            const housingCompanyAddress = document.createElement("p");
+            housingCompanyAddress.innerHTML = `${housingCompany.address.street} ${housingCompany.address.number}, ${housingCompany.postcode.code} ${housingCompany.city.name}`;
+            const hcCheckBoxDiv = document.createElement("div");
+            hcCheckBoxDiv.classList.add("hc-checkbox-div");
+            const label1 = document.createElement("label");
+            label1.setAttribute("for", "check-box-hc");
+            label1.innerHTML = "Valitse";
+            const hcCheckBox = document.createElement("input");
+            hcCheckBox.setAttribute("type", "checkbox");
+            hcCheckBox.setAttribute("class", "check-box-hc");
+            hcCheckBox.value = housingCompany.id;
+            housingCompanyDiv.appendChild(housingCompanyName);
+            housingCompanyDiv.appendChild(housingCompanyAddress);
+            hcCheckBoxDiv.appendChild(label1);
+            hcCheckBoxDiv.appendChild(hcCheckBox);
+            housingCompanyDiv.appendChild(hcCheckBoxDiv);
+            housingCompaniesDiv.appendChild(housingCompanyDiv);
+            postcodeDiv.appendChild(housingCompaniesDiv);
+          });
+        });
+        checkBoxAll.onchange = () => {
+          const postcodeCheckboxes = document.querySelectorAll(
+            ".check-box-postcode"
+          );
+          const hcCheckBox = document.querySelectorAll(".check-box-hc");
+          const hcsDiv = document.querySelectorAll(".housing-companies");
+          postcodeCheckboxes.forEach((checkBox) => {
+            if (checkBoxAll.checked) {
+              checkBox.checked = true;
+              hcsDiv.forEach((div) => {
+                div.style.display = "block";
+              });
+              hcCheckBox.forEach((box) => {
+                box.checked = true;
+              });
+            } else if (!checkBoxAll.checked) {
+              checkBox.checked = false;
+              hcsDiv.forEach((div) => {
+                div.style.display = "none";
+              });
+              hcCheckBox.forEach((box) => {
+                box.checked = false;
+              });
+            }
+          });
+        };
+        const postcodeCheckboxes = document.querySelectorAll(
+          ".check-box-postcode"
+        );
+        postcodeCheckboxes.forEach((checkBox) => {
+          checkBox.addEventListener("click", (elem) => {
+            const parentElem = elem.target.parentElement.parentElement;
+            const hcCheckBox = parentElem.querySelectorAll(".check-box-hc");
+            const hcsDiv = document.querySelectorAll(".housing-companies");
+            if (checkBox.checked) {
+              hcsDiv.forEach((div) => {
+                if (div.parentElement === parentElem) {
+                  div.style.display = "block";
+                }
+              });
+              hcCheckBox.forEach((box) => {
+                box.checked = true;
+              });
+            } else {
+              // hcsDiv.forEach((div) => {
+              //   div.style.display = "none";
+              // });
+              hcCheckBox.forEach((box) => {
+                box.checked = false;
+              });
+            }
+          });
+        });
+      };
+      renderPostcodesByCity(postcodesByArea(housingCompanies));
+      cityAll.addEventListener("click", () => {
+        renderPostcodesByCity(postcodesByArea(housingCompanies));
+      });
+      cityHel.addEventListener("click", () => {
+        renderPostcodesByCity(postcodesByArea(helsinki));
+      });
+      cityEsp.addEventListener("click", () => {
+        renderPostcodesByCity(postcodesByArea(espoo));
+      });
+      cityVan.addEventListener("click", () => {
+        renderPostcodesByCity(postcodesByArea(vantaa));
+      });
+      cityKau.addEventListener("click", () => {
+        renderPostcodesByCity(postcodesByArea(kauniainen));
+      });
+      // cityAll.addEventListener("click", async () => {
+      //   housingCompaniesDiv.innerHTML = "";
+      //   const checkBox = document.createElement("input");
+      //   checkBox.setAttribute("type", "checkbox");
+      //   checkBox.setAttribute("id", "check-box");
+      //   const label = document.createElement("label");
+      //   label.setAttribute("for", "check-box");
+      //   label.innerHTML = "Valitse kaikki";
+      //   housingCompaniesDiv.appendChild(label);
+      //   housingCompaniesDiv.appendChild(checkBox);
+      //   housingCompanies.forEach((housingCompany) => {
+      //     const housingCompanyDiv = document.createElement("div");
+      //     housingCompanyDiv.classList.add("housing-company");
+      //     const housingCompanyName = document.createElement("h3");
+      //     housingCompanyName.innerHTML = housingCompany.NAME;
+      //     const housingCompanyAddress = document.createElement("p");
+      //     housingCompanyAddress.innerHTML = `${housingCompany.address.street} ${housingCompany.address.number}, ${housingCompany.postcode.code} ${housingCompany.city.name}`;
+      //     const hcCheckBox = document.createElement("input");
+      //     hcCheckBox.setAttribute("type", "checkbox");
+      //     hcCheckBox.setAttribute("class", "check-box-hc");
+      //     hcCheckBox.value = housingCompany.id;
+      //     housingCompanyDiv.appendChild(housingCompanyName);
+      //     housingCompanyDiv.appendChild(housingCompanyAddress);
+      //     housingCompanyDiv.appendChild(hcCheckBox);
+      //     housingCompaniesDiv.appendChild(housingCompanyDiv);
+      //   });
+      // });
+      // cityHel.addEventListener("click", async () => {
+      //   housingCompaniesDiv.innerHTML = "";
+      //   const checkBox = document.createElement("input");
+      //   checkBox.setAttribute("type", "checkbox");
+      //   checkBox.setAttribute("id", "check-box");
+      //   const label = document.createElement("label");
+      //   label.setAttribute("for", "check-box");
+      //   label.innerHTML = "Valitse kaikki";
+      //   housingCompaniesDiv.appendChild(checkBox);
+      //   helsinki.forEach((housingCompany) => {
+      //     const housingCompanyDiv = document.createElement("div");
+      //     housingCompanyDiv.classList.add("housing-company");
+      //     const housingCompanyName = document.createElement("h3");
+      //     housingCompanyName.innerHTML = housingCompany.NAME;
+      //     const housingCompanyAddress = document.createElement("p");
+      //     housingCompanyAddress.innerHTML = `${housingCompany.address.street} ${housingCompany.address.number}, ${housingCompany.postcode.code} ${housingCompany.city.name}`;
+      //     housingCompanyDiv.appendChild(housingCompanyName);
+      //     housingCompanyDiv.appendChild(housingCompanyAddress);
+      //     housingCompaniesDiv.appendChild(housingCompanyDiv);
+      //   });
+      // });
+      const nextStep = () => {
+        const hcCheckBox = document.querySelectorAll(".check-box-hc");
+        const hcIds = [];
+        hcCheckBox.forEach((box) => {
+          if (box.checked) {
+            hcIds.push(box.value);
+          }
+        });
+        console.log(hcIds);
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("hc_ids", JSON.stringify(hcIds));
+
+        window.location.href = `createSurvey.html?${urlParams.toString()}`;
+      };
+      submitButton.addEventListener("click", nextStep);
+    };
+    getAndRenderHousingCompanies();
+  </script>
+</html>

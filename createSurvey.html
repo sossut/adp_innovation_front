@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <form id="survey-form">
+        <div>
+          <label for="survey-start-date">Kyselyn aloituspäivämäärä</label>
+          <input type="date" id="survey-start-date" name="start-date" />
+        </div>
+        <div>
+          <label for="survey-end-date">Kyselyn lopetuspäivämäärä</label>
+          <input type="date" id="survey-end-date" name="end-date" />
+        </div>
+        <div>
+          <label for="survey-min-responses">Minimi vastausmäärä</label>
+          <input type="text" id="survey-min-responses" name="min-responses" />
+        </div>
+        <!-- <div>
+          <label for="survey-end-date">Kyselyn päättymispäivämäärä</label>
+          <input type="date" id="survey-end-date" name="end-date" />
+        </div>
+        <div>
+          <label for="survey-questions">Kysymykset</label>
+          <input type="text" id="survey-questions" name="questions" />
+        </div> -->
+        <div>
+          <button id="submit-button" type="button">Luo uusi kysely</button>
+        </div>
+      </form>
+    </div>
+  </body>
+  <script>
+    // haetaan urlista housing_company_ids array
+    const urlParams = new URLSearchParams(window.location.search);
+    const receivedQueryString = urlParams.get("hc_ids");
+    const housingCompanyStringIds = JSON.parse(receivedQueryString);
+    const housingCompanyIds = housingCompanyStringIds.map((id) => parseInt(id));
+    // const housingCompanyIds = [15, 17, 18, 19];
+    const surveyForm = document.getElementById("survey-form");
+    const surveyStartDate = document.getElementById("survey-start-date");
+    const surveyEndDate = document.getElementById("survey-end-date");
+    const surveyMinResponses = document.getElementById("survey-min-responses");
+    const submitButton = document.getElementById("submit-button");
+    surveyStartDate.value = new Date().toISOString().slice(0, 10);
+    const createSurveys = async (event) => {
+      event.preventDefault();
+      const mr = parseInt(surveyMinResponses.value);
+      if (isNaN(mr) && surveyMinResponses.value != "") {
+        alert("Minimi vastausmäärän pitää olla numero");
+        return;
+      }
+      if (
+        surveyStartDate.value > surveyEndDate.value &&
+        surveyEndDate.value != ""
+      ) {
+        console.log(surveyEndDate.value);
+        alert(
+          "Kyselyn aloituspäivämäärä ei voi olla myöhemmin kuin lopetuspäivämäärä"
+        );
+        return;
+      }
+
+      housingCompanyIds.forEach(async (housingCompanyId) => {
+        const survey = {
+          start_date: surveyStartDate.value,
+          end_date: surveyEndDate.value,
+          min_responses: parseInt(surveyMinResponses.value),
+          //tähän oikea housing_company_id
+          housing_company_id: parseInt(housingCompanyId),
+        };
+        try {
+          const response = await fetch(
+            "https://shtsvr.mooo.com/adp/api/v1/survey",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify(survey),
+            }
+          );
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.log(error);
+        }
+      });
+      alert("Kyselyt luotu id:llä: " + housingCompanyIds.join(", "));
+      window.location.href = "surveys.html";
+    };
+    submitButton.addEventListener("click", createSurveys);
+  </script>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="link">LINKKI TÄHÄN</div>
+  </body>
+  <script>
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const myParam = urlParams.get("id");
+    const linkDiv = document.getElementById("link");
+    const getSurvey = async () => {
+      const response = await fetch(
+        `https://shtsvr.mooo.com/adp/api/surveys/${myParam}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const survey = await response.json();
+      linkDiv.innerHTML = `<a href="${survey.link}">Linkki kyselyyn</a>`;
+      console.log(survey);
+    };
+    getSurvey();
+  </script>
+</html>

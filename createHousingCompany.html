@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #new-housing-company {
+        display: flex;
+        flex-direction: column;
+        margin: 2%;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="new-housing-company">
+      <div>
+        <label for="housing-company-name">Taloyhtiön nimi</label>
+        <input type="text" id="housing-company-name" name="name" />
+      </div>
+      <div id="address-div">
+        <label for="housing-company-street">Katu</label>
+        <input type="text" id="housing-company-street" name="street" />
+        <label for="housing-company-street-number">Numero</label>
+        <input
+          type="text"
+          id="housing-company-street-number"
+          name="street-number"
+        />
+      </div>
+      <div>
+        <label for="housing-company-postcode">Postinumero</label>
+        <input type="text" id="housing-company-postcode" name="postcode" />
+      </div>
+      <div>
+        <label for="housing-company-city">Kaupunki</label>
+        <input type="text" id="housing-company-city" name="city" />
+      </div>
+      <div>
+        <label for="housing-company-apartment-count"
+          >Asuntojen määrä taloyhtiössä</label
+        >
+        <input
+          type="text"
+          id="housing-company-apartment-count"
+          name="apartment-count"
+        />
+      </div>
+      <div>
+        <button id="submit-button" type="button">Luo uusi taloyhtiö</button>
+      </div>
+    </form>
+  </body>
+</html>
+
+<script>
+  const newHousingCompanyForm = document.getElementById("new-housing-company");
+  const housingCompanyName = document.getElementById("housing-company-name");
+  const housingCompanyStreet = document.getElementById(
+    "housing-company-street"
+  );
+  const housingCompanyStreetNumber = document.getElementById(
+    "housing-company-street-number"
+  );
+  const housingCompanyPostcode = document.getElementById(
+    "housing-company-postcode"
+  );
+  const housingCompanyCity = document.getElementById("housing-company-city");
+  const housingCompanyApartmentCount = document.getElementById(
+    "housing-company-apartment-count"
+  );
+  const submitButton = document.getElementById("submit-button");
+  const createNewHousingCompany = async (event) => {
+    event.preventDefault();
+    try {
+      const housingCompany = {
+        name: housingCompanyName.value,
+        street_name: housingCompanyStreet.value,
+        address_number: housingCompanyStreetNumber.value,
+        postcode: housingCompanyPostcode.value,
+        city_name: housingCompanyCity.value,
+        apartment_count: housingCompanyApartmentCount.value,
+      };
+      console.log(JSON.stringify(housingCompany));
+      const response = await fetch(
+        "https://shtsvr.mooo.com/adp/api/v1/housing-company/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          body: JSON.stringify(housingCompany),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  submitButton.addEventListener("click", createNewHousingCompany);
+</script>

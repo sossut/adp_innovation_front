@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      button {
+        border-radius: 50%;
+        color: #388782;
+        border-color: #388782;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+      button:hover {
+        color: #ffffff;
+        background-color: #388782;
+      }
+      ul {
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        margin: 10px;
+      }
+      li {
+        margin: 10px;
+      }
+      #div1 {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 10px;
+        padding: 5px;
+        box-shadow: 0px 1px 1px #388782;
+        font-size: 20px;
+        font-family: intern;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="myList">
+      <div id="listStuff"></div>
+    </ul>
+  </body>
+</html>
+
+<script>
+  // const kylat = [
+  //   "Oulunkylä",
+  //   "Alppikylä",
+  //   "Eira",
+  //   "Jakomäki",
+  //   "Viikinmäki",
+  //   "Viikki",
+  // ];
+
+  const getAndRenderPostcodesWhereUserHasHousingCompanies = async () => {
+    const getPostcodes = async () => {
+      try {
+        const response = await fetch(
+          "https://shtsvr.mooo.com/adp/api/v1/postcode/housing-company/user/current",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+        const result = await response.json();
+        console.log(result);
+        return result;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    try {
+      const postcodes = await getPostcodes();
+      const list = document.getElementById("myList");
+      postcodes.forEach((item) => {
+        const di = document.createElement("diV");
+        di.setAttribute("id", "div1");
+        list.appendChild(di);
+
+        const li = document.createElement("li");
+        li.innerText = item.name;
+        di.appendChild(li);
+
+        const bu = document.createElement("button");
+        bu.innerText = "+";
+        di.appendChild(bu);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  getAndRenderPostcodesWhereUserHasHousingCompanies();
+</script>

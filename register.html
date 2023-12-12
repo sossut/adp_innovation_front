@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <form id="login-form">
+        <div>
+          <label for="username">Nimesi</label>
+          <input type="text" id="username" name="username" />
+        </div>
+        <div>
+          <label for="email">Sähköpostiosoite</label>
+          <input type="text" id="email" name="email" />
+        <div>
+          <label for="password">Salasana</label>
+          <input type="password" id="password" name="password" />
+        </div>
+        <div style="display: flex;">
+          <label for="password2">Salasana uudelleen</label>
+          <input type="password" id="password2" name="password2" />
+          <p style="padding: 0; margin: 0; color: red; display: none;" id="password-error" >Salasanat eivät täsmää</p>
+        </div>
+        <div>
+          <button type="button" id="register-button" disabled>Kirjaudu sisään</button>
+        </div>
+      </form>
+    </div>
+  </body>
+  <script src="register.js"></script>
+</html>

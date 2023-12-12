@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <style>
+      #map {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 id="header">Alueet</h2>
+    <div id="cities">
+      <button id="city-all" class="city active">Kaikki</button>
+      <button id="city-hel" class="city">Helsinki</button>
+      <button id="city-esp" class="city">Espoo</button>
+      <button id="city-van" class="city">Vantaa</button>
+      <button id="city-kau" class="city">Kauniainen</button>
+    </div>
+
+    <div id="postcodes"></div>
+    <button id="show-chosen-button">Näytä valitut</button>
+    <div id="map"></div>
+  </body>
+  <script>
+    const getAndRenderCoordinates = async () => {
+      const map = new L.map("map");
+      const markers = L.layerGroup();
+
+      const svgColorSet = (color) => {
+        const svg = `<svg fill="${color}" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    	    viewBox="0 0 512 512" xml:space="preserve">
+            <g>
+              <g>
+                <g>
+                  <path d="M503.467,494.933H460.8V51.2h17.067c4.71,0,8.533-3.823,8.533-8.533V8.533c0-4.71-3.823-8.533-8.533-8.533H34.133
+                    C29.423,0,25.6,3.823,25.6,8.533v34.133c0,4.71,3.823,8.533,8.533,8.533H51.2v443.733H8.533c-4.71,0-8.533,3.823-8.533,8.533
+                    S3.823,512,8.533,512h51.2h238.933h102.4h51.2h51.2c4.71,0,8.533-3.823,8.533-8.533S508.177,494.933,503.467,494.933z
+                    M238.933,418.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867c-4.71,0-8.533-3.823-8.533-8.533v-68.267
+                    c0-4.71,3.823-8.533,8.533-8.533h68.267H230.4c4.71,0,8.533,3.823,8.533,8.533V418.133z M238.933,281.6
+                    c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867c-4.71,0-8.533-3.823-8.533-8.533v-68.267c0-4.71,3.823-8.533,8.533-8.533h68.267
+                    H230.4c4.71,0,8.533,3.823,8.533,8.533V281.6z M238.933,162.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867
+                    c-4.71,0-8.533-3.823-8.533-8.533V93.867c0-4.71,3.823-8.533,8.533-8.533h68.267H230.4c4.71,0,8.533,3.823,8.533,8.533V162.133z
+                    M409.6,494.933h-17.067V358.4H358.4v136.533h-17.067V358.4H307.2v136.533h-17.067V349.867c0-4.71,3.823-8.533,8.533-8.533h102.4
+                    c4.71,0,8.533,3.823,8.533,8.533V494.933z M426.667,281.6c0,4.71-3.823,8.533-8.533,8.533h-68.267H281.6
+                    c-4.71,0-8.533-3.823-8.533-8.533v-68.267c0-4.71,3.823-8.533,8.533-8.533h68.267h68.267c4.71,0,8.533,3.823,8.533,8.533V281.6z
+                    M426.667,162.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H281.6c-4.71,0-8.533-3.823-8.533-8.533V93.867
+                    c0-4.71,3.823-8.533,8.533-8.533h68.267h68.267c4.71,0,8.533,3.823,8.533,8.533V162.133z"/>
+                  <rect x="170.667" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="170.667" y="358.4" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="358.4" width="51.2" height="51.2"/>
+                  <rect x="358.4" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="290.133" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="170.667" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="358.4" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="290.133" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="221.867" width="51.2" height="51.2"/>
+                </g>
+              </g>
+            </g>
+          </svg>`;
+        return svg;
+      };
+      const urlSet = (color) => {
+        const url = `data:image/svg+xml;base64,${btoa(svgColorSet(color))}`;
+        return url;
+      };
+
+      const greenIcon = L.icon({
+        iconUrl: urlSet("#008000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const redIcon = L.icon({
+        iconUrl: urlSet("#ff0000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const blueIcon = L.icon({
+        iconUrl: urlSet("#0000ff"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const blackIcon = L.icon({
+        iconUrl: urlSet("#000000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+      const getHousingCompanies = async () => {
+        try {
+          const response = await fetch(
+            "https://adp2.onrender.com/api/v1/housing-company/",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          const housingCompanies = await response.json();
+          console.log(housingCompanies);
+          const coordinates = await housingCompanies.filter((item) => {
+            return (item.location !== null) | (item.location === undefined);
+          });
+
+          // const list = document.getElementById("myList");
+          // housingCompanies.forEach((item) => {
+          //   const di = document.createElement("diV");
+          //   di.setAttribute("id", "div1");
+          //   list.appendChild(di);
+
+          //   const li = document.createElement("li");
+          //   li.innerText = item.name;
+          //   di.appendChild(li);
+
+          //   const bu = document.createElement("button");
+          //   bu.innerText = "+";
+          //   di.appendChild(bu);
+          // });
+
+          console.log(coordinates);
+          return { coordinates, housingCompanies };
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      const polygons = L.layerGroup().addTo(map);
+
+      // const addPolygon = (pArea, color, name) => {
+      //   console.log(pArea);
+      //   const area = {
+      //     type: "Feature",
+      //     geometry: {
+      //       type: "Polygon",
+      //       coordinates: [pArea],
+      //     },
+      //     popupContent: name,
+      //   };
+      //   console.log(area);
+      //   const style = {
+      //     color: color,
+      //     opasity: 0.5,
+      //   };
+
+      //   const polygon = L.geoJSON(area, { style: style }).addTo(map);
+      //   polygon.on("click", () => {
+      //     console.log("kakka");
+      //   });
+      // };
+      // const polygon = [
+      //   {
+      //     type: "Feature",
+      //     geometry: {
+      //       type: "Polygon",
+      //       coordinates: [
+      //         [
+      //           [-109.05, 41.0],
+      //           [-102.06, 40.99],
+      //           [-102.03, 36.99],
+      //           [-109.04, 36.99],
+      //           [-109.05, 41.0],
+      //         ],
+      //       ],
+      //     },
+      //   },
+      // // ];
+      // console.log(1, polygon);
+      const addPolygon = (polygon, color, name) => {
+        const layer = L.geoJSON(polygon, {
+          style: function () {
+            return { color: color };
+          },
+        })
+          .bindPopup(name)
+          .addTo(map);
+
+        polygons.addLayer(layer);
+      };
+
+      const getAndRenderHousingCompanies = async () => {
+        const cities = document.getElementById("cities");
+        const cityAll = document.getElementById("city-all");
+        const cityHel = document.getElementById("city-hel");
+        const cityEsp = document.getElementById("city-esp");
+        const cityVan = document.getElementById("city-van");
+        const cityKau = document.getElementById("city-kau");
+        const submitButton = document.getElementById("submit-button");
+        const cityButtons = document.querySelectorAll(".city");
+        const postCodesDiv = document.getElementById("postcodes");
+
+        const { housingCompanies } = await getHousingCompanies();
+        const espoo = housingCompanies.filter(
+          (housingCompany) => housingCompany.city.name === "Espoo"
+        );
+        const helsinki = housingCompanies.filter(
+          (housingCompany) => housingCompany.city.name === "Helsinki"
+        );
+        const vantaa = housingCompanies.filter(
+          (housingCompany) => housingCompany.city.name === "Vantaa"
+        );
+        const kauniainen = housingCompanies.filter(
+          (housingCompany) => housingCompany.city.name === "Kauniainen"
+        );
+        const filterByPostcode = (array, postcode) => {
+          const filteredHousingCompanies = array.filter(
+            (housingCompany) => housingCompany.postcode.code === postcode
+          );
+          return filteredHousingCompanies;
+        };
+        console.log(filterByPostcode(helsinki, "00130"));
+
+        cityButtons.forEach((button) => {
+          button.addEventListener("click", (elem) => {
+            const siblings = elem.target.parentNode.children;
+            for (let i = 0; i < siblings.length; i++) {
+              siblings[i].classList.remove("active");
+            }
+            elem.target.classList.add("active");
+          });
+        });
+
+        const postcodesByArea = (array) => {
+          const postcodes = array.map((housingCompany) => {
+            const postcode = {
+              name: housingCompany.postcode.name,
+              id: housingCompany.postcode.postcode_id,
+              code: housingCompany.postcode.code,
+              housingCompanies: filterByPostcode(
+                housingCompanies,
+                housingCompany.postcode.code
+              ),
+            };
+
+            return postcode;
+          });
+
+          const unique = postcodes.filter(
+            (thing, index, self) =>
+              index ===
+              self.findIndex(
+                (t) => t.code === thing.code && t.name === thing.name
+              )
+          );
+          //aakkosjärjestys
+          const sortedByPostcode = unique.sort((a, b) =>
+            // a.code > b.code ? 1 : -1
+            a.code.localeCompare(b.code)
+          );
+          return sortedByPostcode;
+        };
+
+        const renderPostcodesByCity = (array) => {
+          postCodesDiv.innerHTML = "";
+          const checkBoxAll = document.createElement("input");
+          checkBoxAll.setAttribute("type", "checkbox");
+          checkBoxAll.setAttribute("id", "check-box");
+          const label = document.createElement("label");
+          label.setAttribute("for", "check-box");
+          label.innerHTML = "Valitse kaikki";
+          postCodesDiv.appendChild(label);
+          postCodesDiv.appendChild(checkBoxAll);
+          array.forEach((postcode) => {
+            const postcodeDiv = document.createElement("div");
+            const area = JSON.parse(postcode.housingCompanies[0].postcode.area);
+            const polygon = {
+              type: "Feature",
+              geometry: {
+                type: "Polygon",
+                coordinates: [area],
+              },
+              popupContent: postcode.name,
+            };
+            console.log(polygon);
+            const p = addPolygon((polygon, "#000000", postcode.NAME));
+            console.log(p);
+            postcodeDiv.classList.add("postcode");
+            (postcodeDiv.id = "postcode-id-"), postcode.id;
+            const headerDiv = document.createElement("div");
+            headerDiv.classList.add("postcode-header-div");
+            const postcodeName = document.createElement("h3");
+            postcodeName.innerHTML = postcode.name + " " + postcode.code;
+
+            headerDiv.appendChild(postcodeName);
+
+            postcodeDiv.appendChild(headerDiv);
+            const postcodeCheckBoxDiv = document.createElement("div");
+            postcodeCheckBoxDiv.classList.add("postcode-checkbox-div");
+            const postcodeCheckBox = document.createElement("input");
+            postcodeCheckBox.setAttribute("type", "checkbox");
+            postcodeCheckBox.setAttribute("class", "check-box-postcode");
+            postcodeCheckBox.value = postcode.id;
+            const label = document.createElement("label");
+            label.setAttribute("for", "check-box-postcode");
+            label.innerHTML = "Valitse";
+            const showPostCodeOnMapButton = document.createElement("button");
+            showPostCodeOnMapButton.classList.add("show-button");
+            showPostCodeOnMapButton.innerHTML = "Näytä kartalla";
+
+            showPostCodeOnMapButton.addEventListener("click", async () => {
+              polygons.clearLayers();
+              console.log("Polygon data:", postcode);
+              const getPostcodeResult = async () => {
+                const response = await fetch(
+                  `https://adp2.onrender.com/api/v1/result/postcode/${postcode.id}`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+
+                const result = await response.json();
+                console.log(result);
+                return result;
+              };
+              const postcodeResult = await getPostcodeResult();
+
+              if (!polygon) {
+                console.error("Polygon data is not available");
+                return;
+              }
+              if (postcodeResult.total_result === "negative") {
+                addPolygon(polygon, "#ff0000", postcode.name);
+              } else if (postcodeResult.total_result === "even") {
+                console.log("even");
+                addPolygon(polygon, "#0000ff", postcode.name);
+              } else if (postcodeResult.total_result === "positive") {
+                addPolygon(polygon, "#008000", postcode.name);
+              } else {
+                addPolygon(polygon, "#000000", postcode.name);
+              }
+            });
+            postcodeCheckBoxDiv.appendChild(label);
+            postcodeCheckBoxDiv.appendChild(postcodeCheckBox);
+            postcodeCheckBoxDiv.appendChild(showPostCodeOnMapButton);
+            postcodeDiv.appendChild(postcodeCheckBoxDiv);
+            postCodesDiv.appendChild(postcodeDiv);
+          });
+          checkBoxAll.onchange = () => {
+            const postcodeCheckboxes = document.querySelectorAll(
+              ".check-box-postcode"
+            );
+            postcodeCheckboxes.forEach((checkBox) => {
+              if (checkBoxAll.checked) {
+                checkBox.checked = true;
+              } else if (!checkBoxAll.checked) {
+                checkBox.checked = false;
+              }
+            });
+          };
+        };
+        renderPostcodesByCity(postcodesByArea(housingCompanies));
+        cityAll.addEventListener("click", () => {
+          renderPostcodesByCity(postcodesByArea(housingCompanies));
+        });
+        cityHel.addEventListener("click", () => {
+          renderPostcodesByCity(postcodesByArea(helsinki));
+        });
+        cityEsp.addEventListener("click", () => {
+          renderPostcodesByCity(postcodesByArea(espoo));
+        });
+        cityVan.addEventListener("click", () => {
+          renderPostcodesByCity(postcodesByArea(vantaa));
+        });
+        cityKau.addEventListener("click", () => {
+          renderPostcodesByCity(postcodesByArea(kauniainen));
+        });
+      };
+      getAndRenderHousingCompanies();
+
+      const renderMap = async () => {
+        map.setView([60.192059, 24.945831], 11);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+        const options = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        };
+      };
+
+      renderMap();
+      const manyPostcodes = async () => {
+        const checkboxes = document.querySelectorAll(".check-box-postcode");
+        const postcodesArray = Array.from(checkboxes);
+        const checkedPostcodes = postcodesArray.filter((postcode) => {
+          return postcode.checked;
+        });
+        const postcodesIds = checkedPostcodes.map((postcode) => {
+          return postcode.value;
+        });
+
+        const getPostcodes = async (array) => {
+          try {
+            array.forEach(async (id) => {
+              try {
+                let response = await fetch(
+                  `https://adp2.onrender.com/api/v1/result/postcode/${id}`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                let result = await response.json();
+                const area = JSON.parse(result.postcode.area);
+                const polygon = {
+                  type: "Feature",
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: [area],
+                  },
+                  popupContent: result.postcode.name,
+                };
+                if (!polygon) {
+                  console.error("Polygon data is not available");
+                  return;
+                }
+
+                if (result.total_result === "negative") {
+                  addPolygon(polygon, "#ff0000", result.postcode.name);
+                } else if (result.total_result === "even") {
+                  addPolygon(polygon, "#0000ff", result.postcode.name);
+                } else if (result.total_result === "positive") {
+                  addPolygon(polygon, "#008000", result.postcode.name);
+                } else {
+                  addPolygon(polygon, "#000000", result.postcode.name);
+                }
+              } catch (error) {
+                response = await fetch(
+                  `https://adp2.onrender.com/api/v1/postcode/${id}`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                result = await response.json();
+                const area = JSON.parse(result.area);
+                const polygon = {
+                  type: "Feature",
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: [area],
+                  },
+                  popupContent: result.name,
+                };
+                if (!polygon) {
+                  console.error("Polygon data is not available");
+                  return;
+                }
+
+                addPolygon(polygon, "#000000", result.name);
+              }
+            });
+          } catch (error) {
+            console.log(error);
+          }
+        };
+        getPostcodes(postcodesIds);
+      };
+      const showChosenButton = document.getElementById("show-chosen-button");
+      showChosenButton.addEventListener("click", async () => {
+        polygons.clearLayers();
+        manyPostcodes();
+      });
+    };
+    getAndRenderCoordinates();
+  </script>
+</html>

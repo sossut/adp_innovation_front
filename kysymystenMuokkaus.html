@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #survey-page {
+        border: solid 1px #e6e6e6;
+        border-radius: 10px;
+      }
+
+      div.elementor-widget-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .question {
+        border: solid 1px #e6e6e6;
+        border-radius: 10px;
+        font-family: Inter;
+        color: #2c2a29;
+        margin: 2%;
+        margin-bottom: 5%;
+        position: relative;
+      }
+
+      .answers {
+        padding: 2%;
+      }
+      form {
+        padding: 2%;
+      }
+
+      .buttons {
+        border-radius: 50%;
+        border: transparent;
+        background-color: #388782;
+        color: #fff;
+        margin-right: 2%;
+        padding: 1% 2%;
+        font-size: larger;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fff;
+      }
+      .modal-question {
+        width: 500px;
+        height: 100px;
+        padding: 0.5rem;
+        font-family: Inter;
+      }
+      .modal-answers {
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-answer {
+        width: 500px;
+        border: solid 1px #e6e6e6;
+      }
+      .buttons-2 {
+        border-radius: 50%;
+        border: transparent;
+        background-color: #388782;
+        color: #fff;
+        margin-right: 2%;
+        padding: 1%;
+        font-size: larger;
+      }
+      .modify-question-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      input[type="radio"] {
+        accent-color: #388782;
+      }
+
+      label {
+        font-size: medium;
+      }
+      .submit-button {
+        border: 1px solid #388782;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="questions"></div>
+    </div>
+  </body>
+  <script src="kysymMuokkaus2.js"></script>
+</html>

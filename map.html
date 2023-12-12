@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <style>
+      #map {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
+  <script>
+    const getAndRenderCoordinates = async () => {
+      const map = new L.map("map");
+      const markers = L.layerGroup();
+
+      const svgColorSet = (color) => {
+        const svg = `<svg fill="${color}" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    	    viewBox="0 0 512 512" xml:space="preserve">
+            <g>
+              <g>
+                <g>
+                  <path d="M503.467,494.933H460.8V51.2h17.067c4.71,0,8.533-3.823,8.533-8.533V8.533c0-4.71-3.823-8.533-8.533-8.533H34.133
+                    C29.423,0,25.6,3.823,25.6,8.533v34.133c0,4.71,3.823,8.533,8.533,8.533H51.2v443.733H8.533c-4.71,0-8.533,3.823-8.533,8.533
+                    S3.823,512,8.533,512h51.2h238.933h102.4h51.2h51.2c4.71,0,8.533-3.823,8.533-8.533S508.177,494.933,503.467,494.933z
+                    M238.933,418.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867c-4.71,0-8.533-3.823-8.533-8.533v-68.267
+                    c0-4.71,3.823-8.533,8.533-8.533h68.267H230.4c4.71,0,8.533,3.823,8.533,8.533V418.133z M238.933,281.6
+                    c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867c-4.71,0-8.533-3.823-8.533-8.533v-68.267c0-4.71,3.823-8.533,8.533-8.533h68.267
+                    H230.4c4.71,0,8.533,3.823,8.533,8.533V281.6z M238.933,162.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H93.867
+                    c-4.71,0-8.533-3.823-8.533-8.533V93.867c0-4.71,3.823-8.533,8.533-8.533h68.267H230.4c4.71,0,8.533,3.823,8.533,8.533V162.133z
+                    M409.6,494.933h-17.067V358.4H358.4v136.533h-17.067V358.4H307.2v136.533h-17.067V349.867c0-4.71,3.823-8.533,8.533-8.533h102.4
+                    c4.71,0,8.533,3.823,8.533,8.533V494.933z M426.667,281.6c0,4.71-3.823,8.533-8.533,8.533h-68.267H281.6
+                    c-4.71,0-8.533-3.823-8.533-8.533v-68.267c0-4.71,3.823-8.533,8.533-8.533h68.267h68.267c4.71,0,8.533,3.823,8.533,8.533V281.6z
+                    M426.667,162.133c0,4.71-3.823,8.533-8.533,8.533h-68.267H281.6c-4.71,0-8.533-3.823-8.533-8.533V93.867
+                    c0-4.71,3.823-8.533,8.533-8.533h68.267h68.267c4.71,0,8.533,3.823,8.533,8.533V162.133z"/>
+                  <rect x="170.667" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="170.667" y="358.4" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="358.4" width="51.2" height="51.2"/>
+                  <rect x="358.4" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="290.133" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="102.4" width="51.2" height="51.2"/>
+                  <rect x="170.667" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="358.4" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="290.133" y="221.867" width="51.2" height="51.2"/>
+                  <rect x="102.4" y="221.867" width="51.2" height="51.2"/>
+                </g>
+              </g>
+            </g>
+          </svg>`;
+        return svg;
+      };
+      const urlSet = (color) => {
+        const url = `data:image/svg+xml;base64,${btoa(svgColorSet(color))}`;
+        return url;
+      };
+
+      const greenIcon = L.icon({
+        iconUrl: urlSet("#008000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const redIcon = L.icon({
+        iconUrl: urlSet("#ff0000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const blueIcon = L.icon({
+        iconUrl: urlSet("#0000ff"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      const blackIcon = L.icon({
+        iconUrl: urlSet("#000000"),
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
+      });
+
+      map.addLayer(markers);
+      const getHousingCompanies = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:5000/api/v1/housing-company/",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          const housingCompanies = await response.json();
+          console.log(housingCompanies);
+          const coordinates = await housingCompanies.filter((item) => {
+            return (item.location !== null) | (item.location === undefined);
+          });
+
+          console.log(coordinates);
+          return coordinates;
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      const renderMap = async () => {
+        map.setView([60.192059, 24.945831], 11);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+        const options = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        };
+      };
+      const hcName = document.createElement("h3");
+      const hcAddress = document.createElement("h4");
+      const hcPostcodeAndCity = document.createElement("h4");
+      const popUpContent = document.createElement("div");
+
+      popUpContent.id = "popup-content";
+      const addMarker = (lng, lat, hc, text, icon) => {
+        const marker = L.marker([lat, lng], { icon: icon })
+          .addTo(map)
+          .bindPopup(text)
+          .on("popupopen", () => {
+            hcName.innerHTML = hc.NAME;
+            hcAddress.innerHTML = hc.address.street + " " + hc.address.number;
+            hcPostcodeAndCity.innerHTML = hc.postcode.code + " " + hc.city.name;
+
+            popUpContent.appendChild(hcName);
+            popUpContent.appendChild(hcAddress);
+            popUpContent.appendChild(hcPostcodeAndCity);
+            document.querySelector("body").appendChild(popUpContent);
+          });
+      };
+
+      const addMarkersFromCoordinates = async () => {
+        const coordinates = await getHousingCompanies();
+        coordinates.forEach((item) => {
+          const lng = JSON.parse(item.location)[0];
+          const lat = JSON.parse(item.location)[1];
+          if (!item.survey_result) {
+            addMarker(
+              lng,
+              lat,
+              item,
+              item.NAME +
+                " " +
+                item.address.street +
+                " " +
+                item.address.number +
+                " " +
+                item.postcode.code +
+                " " +
+                item.city.name,
+              blackIcon
+            );
+          } else if (item.survey_result === "negative")
+            addMarker(
+              lng,
+              lat,
+              item,
+              item.NAME +
+                " " +
+                item.address.street +
+                " " +
+                item.address.number +
+                " " +
+                item.postcode.code +
+                " " +
+                item.city.name,
+              redIcon
+            );
+          else if (item.survey_result === "even")
+            addMarker(
+              lng,
+              lat,
+              item,
+              item.NAME +
+                " " +
+                item.address.street +
+                " " +
+                item.address.number +
+                " " +
+                item.postcode.code +
+                " " +
+                item.city.name,
+              blueIcon
+            );
+          else if (item.survey_result === "positive") {
+            addMarker(
+              lng,
+              lat,
+              item,
+              item.NAME +
+                " " +
+                item.address.street +
+                " " +
+                item.address.number +
+                " " +
+                item.postcode.code +
+                " " +
+                item.city.name,
+              greenIcon
+            );
+          }
+          // addMarker(
+          //   lng,
+          //   lat,
+          //   item,
+          //   item.NAME +
+          //     " " +
+          //     item.address.street +
+          //     " " +
+          //     item.address.number +
+          //     " " +
+          //     item.postcode.code +
+          //     " " +
+          //     item.city.name,
+          //   greenIcon
+          // );
+        });
+      };
+      addMarkersFromCoordinates();
+
+      renderMap();
+    };
+    getAndRenderCoordinates();
+  </script>
+</html>
